@@ -475,6 +475,30 @@ export default {
   },
   setSessionAttribute(context, data) {
     return Promise.resolve(context.commit("setLexSessionAttributeValue", data));
+  },  
+  uploadFile(context, file) {
+    var uploadDetails = JSON.parse(context.state.lex.sessionAttributes.upload);
+    const formData = new FormData();
+
+    Object.keys(uploadDetails.postFields).forEach(key => {
+      formData.append(key, uploadDetails.postFields[key]);
+    });
+    formData.append("file", file)
+
+    fetch(uploadDetails.preSignedUrl, {
+        method: "POST",
+        body: formData
+      }).then((function(e) {        
+        return context.dispatch('postTextMessage', 
+          { 
+            text: uploadDetails.uploadUtterance,
+            type: context.state.config.ui.hideButtonMessageBubble ? 'button' : 'human'
+          }
+        );
+      }
+      )).catch((function(e) {
+        return Promise.resolve()
+      }))
   },
   postTextMessage(context, message) {
     if (context.state.isSFXOn && !context.state.lex.isPostTextRetry) {

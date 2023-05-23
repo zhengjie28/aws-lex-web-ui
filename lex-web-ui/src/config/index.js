@@ -226,6 +226,9 @@ const configDefault = {
     positiveFeedbackIntent: '',
     negativeFeedbackIntent: '',
 
+    // default mime types allowed for upload
+    uploadMimeTypes: '*/*',
+
     // shows a help button on the toolbar when true
     helpIntent: '',
 

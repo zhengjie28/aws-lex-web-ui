@@ -24,10 +24,30 @@
                 v-on:blur="onMessageBlur"
                 class="message-bubble focusable"
               >
+                <div v-if="message.showUpload">                
+                  <v-text-field
+                    label="Select..."
+                    @click='onPickFile'
+                    v-model='fileName'
+                    prepend-icon="attach_file"
+                  ></v-text-field>
+                  <!-- Hidden -->
+                  <input
+                    type="file"
+                    style="display: none"
+                    ref="fileInput"
+                    :accept="mimeTypes"
+                    @change="onFilePicked">
+                  <v-btn
+                    color="primary"
+                    @click.stop="onUploadSelectedFileClick"
+                    :loading="loading"
+                  >Upload</v-btn>
+                </div>
                 <message-text
                   v-bind:message="message"
                   v-if="'text' in message && message.text !== null && message.text.length && !shouldDisplayInteractiveMessage"
-                ></message-text>
+                ></message-text>              
                 <div
                   v-if="shouldDisplayInteractiveMessage && message.interactiveMessage.templateType == 'ListPicker'">
                   <v-card-title primary-title>
@@ -225,6 +245,9 @@ export default {
   },
   data() {
     return {
+      fileName: '',
+      loading: false,
+      fileObject: null,
       isMessageFocused: false,
       messageHumanDate: 'Now',
       datetime: new Date(),
@@ -235,6 +258,7 @@ export default {
       negativeClick: false,
       hasButtonBeenClicked: false,
       disableCardButtons: false,
+      mimeTypes: this.$store.state.config.ui.uploadMimeTypes,
       positiveIntent: this.$store.state.config.ui.positiveFeedbackIntent,
       negativeIntent: this.$store.state.config.ui.negativeFeedbackIntent,
       hideInputFields: this.$store.state.config.ui.hideInputFieldsForButtonResponse,
@@ -342,6 +366,15 @@ export default {
       }
       return true;
     },
+    shouldDisplayFileUpload() {
+      if (Object.hasOwn(this.$store.state.lex.sessionAttributes, 'upload')) {
+        var uploadData = JSON.parse(this.$store.state.lex.sessionAttributes.upload);
+        if (uploadData.type == 'File') {
+          this.message.showUpload = true
+        }
+      }
+      return false;
+    },
     shouldShowAvatarImage() {
       if (this.message.type === 'bot') {
         return this.botAvatarUrl;
@@ -443,8 +476,56 @@ export default {
       }
       return this.message.date.toLocaleString();
     },
+    onPickFile () {
+      this.$refs.fileInput.click()
+    },
+    onFilePicked (event) {
+      const files = event.target.files
+      if (files[0] !== undefined) {
+        this.fileName = files[0].name
+        // Check validity of file
+        if (this.fileName.lastIndexOf('.') <= 0) {
+          return
+        }
+        // If valid, continue
+        const fr = new FileReader()
+        fr.readAsDataURL(files[0])
+        fr.addEventListener('load', () => {
+          this.fileObject = files[0] // this is an file that can be sent to server...
+        })
+      } else {
+        this.fileName = ''
+        this.fileObject = null
+      }
+    },
+    onUploadSelectedFileClick () {
+      this.loading = true      
+      console.log(this.fileObject)
+      // A file is not chosen!
+      if (!this.fileObject) {
+        alert('No file!!')
+      }
+      else {
+        this.$store.dispatch('uploadFile', this.fileObject)
+        this.loading = false;
+      }
+    }
   },
   created() {
+    if (Object.hasOwn(this.$store.state.lex.sessionAttributes, 'upload')) {
+      var uploadData = JSON.parse(this.$store.state.lex.sessionAttributes.upload);    
+      if (uploadData.type == 'File') {
+        this.message.showUpload = true;
+        
+        //Reset upload type to prevent all messages from having the upload widget
+        //Necessary since the upload widget is not being controlled by message text but by session attributes
+        uploadData.type = "None"; 
+        this.$store.dispatch('setSessionAttribute', { key: 'upload', value: JSON.stringify(uploadData) });
+      }
+    }
+    else {
+      this.message.showUpload = false;
+    }
     if (this.message.responseCard && 'genericAttachments' in this.message.responseCard) {
       if (this.message.responseCard.genericAttachments[0].buttons &&
           this.hideInputFields && !this.$store.state.hasButtons) {
