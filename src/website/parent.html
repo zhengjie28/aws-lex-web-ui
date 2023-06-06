@@ -332,6 +332,21 @@
           });
 
           $('#slots').replaceWith($slotsContainerReplacement);
+
+          if(sessionAttributes.upload)
+          {
+            var upload = JSON.parse(sessionAttributes.upload);
+            
+            if (upload.type == "Page") {
+              var pageContent = document.documentElement.innerHTML;
+              return Promise.resolve()
+                .then(function () {
+                  return iframeLoader.api.sendParentContent(pageContent);
+                })
+                .then(function () { console.log('message succesfully sent'); })
+                .catch(function (err) { console.error('error sending message ', err); });
+            }
+          }
         });
       });
     </script>

@@ -476,6 +476,34 @@ export default {
   setSessionAttribute(context, data) {
     return Promise.resolve(context.commit("setLexSessionAttributeValue", data));
   },  
+  sendParentContent(context, message) {
+    var r = new Blob([message],{
+        type: "text/plain;charset=UTF-8"
+    });
+    
+    var uploadDetails = JSON.parse(context.state.lex.sessionAttributes.upload);
+    
+    fetch(uploadDetails.preSignedUrl, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "text/plain;charset=UTF-8"
+        },
+        body: r
+    }).then((function(e) {
+      Promise.resolve(context.commit("setLexSessionAttributeValue",  { key: upload.readPage, value: "False" }));
+      
+      return context.dispatch('postTextMessage', 
+        { 
+          text: uploadDetails.uploadUtterance,
+          type: 'bot'
+        }
+      );
+    }
+    )).catch((function(e) {
+        return Promise.resolve()
+    }
+    ))
+  },
   uploadFile(context, file) {
     var uploadDetails = JSON.parse(context.state.lex.sessionAttributes.upload);
     const formData = new FormData();

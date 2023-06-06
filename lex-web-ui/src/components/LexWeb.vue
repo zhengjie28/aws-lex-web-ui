@@ -406,6 +406,23 @@ export default {
               event: 'resolve', type: evt.data.event,
             }));
           break;
+        case 'sendParentContent':
+          if (!evt.data.message) {
+            evt.ports[0].postMessage({
+              event: 'reject',
+              type: evt.data.event,
+              error: 'missing message field',
+            });
+            return;
+          }
+          this.$store.dispatch(
+            'sendParentContent',
+            { type: evt.data.messageType ? evt.data.messageType : messageType, text: evt.data.message },
+          )
+            .then(() => evt.ports[0].postMessage({
+              event: 'resolve', type: evt.data.event,
+            }));
+          break;
         case 'postText':
           if (!evt.data.message) {
             evt.ports[0].postMessage({

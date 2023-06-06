@@ -777,6 +777,9 @@ export class IframeComponentLoader {
       postText: (message, messageType) => (
         this.sendMessageToIframe({event: 'postText', message: message, messageType: messageType})
       ),
+      sendParentContent: (message, messageType) => (
+        this.sendMessageToIframe({event: 'sendParentContent', message: message, messageType: messageType})
+      ),
       deleteSession: () => (
         this.sendMessageToIframe({ event: 'deleteSession' })
       ),
