@@ -489,20 +489,15 @@ export default {
             "Content-Type": "text/plain;charset=UTF-8"
         },
         body: r
-    }).then((function(e) {
-      Promise.resolve(context.commit("setLexSessionAttributeValue",  { key: upload.readPage, value: "False" }));
-      
+    }).then(function(e) {
       return context.dispatch('postTextMessage', 
-        { 
-          text: uploadDetails.uploadUtterance,
-          type: 'bot'
-        }
-      );
-    }
-    )).catch((function(e) {
+      { 
+        text: uploadDetails.uploadUtterance,
+        type: context.state.config.ui.hideButtonMessageBubble ? 'button' : 'human'
+      });
+    }).catch(function(e) {
         return Promise.resolve()
-    }
-    ))
+    })
   },
   uploadFile(context, file) {
     var uploadDetails = JSON.parse(context.state.lex.sessionAttributes.upload);
@@ -516,17 +511,16 @@ export default {
     fetch(uploadDetails.preSignedUrl, {
         method: "POST",
         body: formData
-      }).then((function(e) {        
+      }).then(function(e) {        
         return context.dispatch('postTextMessage', 
           { 
             text: uploadDetails.uploadUtterance,
             type: context.state.config.ui.hideButtonMessageBubble ? 'button' : 'human'
           }
         );
-      }
-      )).catch((function(e) {
+      }).catch(function(e) {
         return Promise.resolve()
-      }))
+      })
   },
   postTextMessage(context, message) {
     if (context.state.isSFXOn && !context.state.lex.isPostTextRetry) {
