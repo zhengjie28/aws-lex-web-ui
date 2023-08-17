@@ -166,7 +166,7 @@ export class IframeComponentLoader {
       this.config.cognito.region || this.config.region || this.config.cognito.poolId.split(':')[0] || 'us-east-1';
     const poolName = `cognito-idp.${region}.amazonaws.com/${this.config.cognito.appUserPoolName}`;
     let credentials;
-    const idtoken = localStorage.getItem(`${this.config.cognito.appUserPoolClientId}idtokenjwt`);
+    const idtoken = sessionStorage.getItem(`${this.config.cognito.appUserPoolClientId}idtokenjwt`);
     if (idtoken) { // auth role since logged in
       try {
         const logins = {};
@@ -197,13 +197,13 @@ export class IframeComponentLoader {
 
   validateIdToken() {
     return new Promise((resolve, reject) => {
-      let idToken = localStorage.getItem(`${this.config.cognito.appUserPoolClientId}idtokenjwt`);
+      let idToken = sessionStorage.getItem(`${this.config.cognito.appUserPoolClientId}idtokenjwt`);
       if (isTokenExpired(idToken)) {
-        const refToken = localStorage.getItem(`${this.config.cognito.appUserPoolClientId}refreshtoken`);
+        const refToken = sessionStorage.getItem(`${this.config.cognito.appUserPoolClientId}refreshtoken`);
         if (refToken && !isTokenExpired(refToken)) {
           refreshLogin(this.generateConfigObj(), refToken, (refSession) => {
             if (refSession.isValid()) {
-              idToken = localStorage.getItem(`${this.config.cognito.appUserPoolClientId}idtokenjwt`);
+              idToken = sessionStorage.getItem(`${this.config.cognito.appUserPoolClientId}idtokenjwt`);
               resolve(idToken);
             } else {
               reject(new Error('failed to refresh tokens'));
@@ -258,7 +258,7 @@ export class IframeComponentLoader {
       }
 
       let credentials;
-      const token = localStorage.getItem(`${this.config.cognito.appUserPoolClientId}idtokenjwt`);
+      const token = sessionStorage.getItem(`${this.config.cognito.appUserPoolClientId}idtokenjwt`);
       if (token) { // auth role since logged in
         return this.validateIdToken().then((idToken) => {
           const logins = {};
@@ -483,9 +483,9 @@ export class IframeComponentLoader {
             const session = auth.getSignInUserSession();
             if (session.isValid()) {
               const tokens = {};
-              tokens.idtokenjwt = localStorage.getItem(`${this.config.cognito.appUserPoolClientId}idtokenjwt`);
-              tokens.accesstokenjwt = localStorage.getItem(`${this.config.cognito.appUserPoolClientId}accesstokenjwt`);
-              tokens.refreshtoken = localStorage.getItem(`${this.config.cognito.appUserPoolClientId}refreshtoken`);
+              tokens.idtokenjwt = sessionStorage.getItem(`${this.config.cognito.appUserPoolClientId}idtokenjwt`);
+              tokens.accesstokenjwt = sessionStorage.getItem(`${this.config.cognito.appUserPoolClientId}accesstokenjwt`);
+              tokens.refreshtoken = sessionStorage.getItem(`${this.config.cognito.appUserPoolClientId}refreshtoken`);
               this.sendMessageToIframe({
                 event: 'confirmLogin',
                 data: tokens,
@@ -498,14 +498,14 @@ export class IframeComponentLoader {
                 });
             }
             else {
-              const refToken = localStorage.getItem(`${this.config.cognito.appUserPoolClientId}refreshtoken`);
+              const refToken = sessionStorage.getItem(`${this.config.cognito.appUserPoolClientId}refreshtoken`);
               if (refToken) {
                 refreshLogin(this.generateConfigObj(), refToken, (refSession) => {
                   if (refSession.isValid()) {
                     const tokens = {};
-                    tokens.idtokenjwt = localStorage.getItem(`${this.config.cognito.appUserPoolClientId}idtokenjwt`);
-                    tokens.accesstokenjwt = localStorage.getItem(`${this.config.cognito.appUserPoolClientId}accesstokenjwt`);
-                    tokens.refreshtoken = localStorage.getItem(`${this.config.cognito.appUserPoolClientId}refreshtoken`);
+                    tokens.idtokenjwt = sessionStorage.getItem(`${this.config.cognito.appUserPoolClientId}idtokenjwt`);
+                    tokens.accesstokenjwt = sessionStorage.getItem(`${this.config.cognito.appUserPoolClientId}accesstokenjwt`);
+                    tokens.refreshtoken = sessionStorage.getItem(`${this.config.cognito.appUserPoolClientId}refreshtoken`);
                     this.sendMessageToIframe({
                       event: 'confirmLogin',
                       data: tokens,
@@ -618,14 +618,14 @@ export class IframeComponentLoader {
 
       // sent to refresh auth tokens as requested by iframe
       refreshAuthTokens(evt) {
-        const refToken = localStorage.getItem(`${this.config.cognito.appUserPoolClientId}refreshtoken`);
+        const refToken = sessionStorage.getItem(`${this.config.cognito.appUserPoolClientId}refreshtoken`);
         if (refToken) {
           refreshLogin(this.generateConfigObj(), refToken, (refSession) => {
             if (refSession.isValid()) {
               const tokens = {};
-              tokens.idtokenjwt = localStorage.getItem(`${this.config.cognito.appUserPoolClientId}idtokenjwt`);
-              tokens.accesstokenjwt = localStorage.getItem(`${this.config.cognito.appUserPoolClientId}accesstokenjwt`);
-              tokens.refreshtoken = localStorage.getItem(`${this.config.cognito.appUserPoolClientId}refreshtoken`);
+              tokens.idtokenjwt = sessionStorage.getItem(`${this.config.cognito.appUserPoolClientId}idtokenjwt`);
+              tokens.accesstokenjwt = sessionStorage.getItem(`${this.config.cognito.appUserPoolClientId}accesstokenjwt`);
+              tokens.refreshtoken = sessionStorage.getItem(`${this.config.cognito.appUserPoolClientId}refreshtoken`);
               evt.ports[0].postMessage({
                 event: 'resolve',
                 type: evt.data.event,
@@ -715,9 +715,9 @@ export class IframeComponentLoader {
     try {
       this.containerElement.classList.toggle(`${this.containerClass}--minimize`);
       if (this.containerElement.classList.contains(`${this.containerClass}--minimize`)) {
-        localStorage.setItem(`${this.config.cognito.appUserPoolClientId}lastUiIsMinimized`, 'true');
+        sessionStorage.setItem(`${this.config.cognito.appUserPoolClientId}lastUiIsMinimized`, 'true');
       } else {
-        localStorage.setItem(`${this.config.cognito.appUserPoolClientId}lastUiIsMinimized`, 'false');
+        sessionStorage.setItem(`${this.config.cognito.appUserPoolClientId}lastUiIsMinimized`, 'false');
       }
       return Promise.resolve();
     } catch (err) {
@@ -734,10 +734,10 @@ export class IframeComponentLoader {
         // check for last state and resume with this configuration
         if (this.config.iframe.shouldLoadIframeMinimized) {
           this.api.toggleMinimizeUi();
-          localStorage.setItem(`${this.config.cognito.appUserPoolClientId}lastUiIsMinimized`, 'true');
-        } else if (localStorage.getItem(`${this.config.cognito.appUserPoolClientId}lastUiIsMinimized`) && localStorage.getItem(`${this.config.cognito.appUserPoolClientId}lastUiIsMinimized`) === 'true') {
+          sessionStorage.setItem(`${this.config.cognito.appUserPoolClientId}lastUiIsMinimized`, 'true');
+        } else if (sessionStorage.getItem(`${this.config.cognito.appUserPoolClientId}lastUiIsMinimized`) && sessionStorage.getItem(`${this.config.cognito.appUserPoolClientId}lastUiIsMinimized`) === 'true') {
           this.api.toggleMinimizeUi();
-        } else if (localStorage.getItem(`${this.config.cognito.appUserPoolClientId}lastUiIsMinimized`) && localStorage.getItem(`${this.config.cognito.appUserPoolClientId}lastUiIsMinimized`) === 'false') {
+        } else if (sessionStorage.getItem(`${this.config.cognito.appUserPoolClientId}lastUiIsMinimized`) && sessionStorage.getItem(`${this.config.cognito.appUserPoolClientId}lastUiIsMinimized`) === 'false') {
           this.api.ping();
         }
       })

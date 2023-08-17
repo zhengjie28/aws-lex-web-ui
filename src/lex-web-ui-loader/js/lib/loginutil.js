@@ -20,7 +20,7 @@ const loopKey = `login_util_loop_count`;
 const maxLoopCount = 5;
 
 function getLoopCount(config) {
-  let loopCount = localStorage.getItem(`${config.appUserPoolClientId}${loopKey}`);
+  let loopCount = sessionStorage.getItem(`${config.appUserPoolClientId}${loopKey}`);
   if (loopCount === undefined || loopCount === null) {
     console.warn(`setting loopcount to string 0`);
     loopCount = "0";
@@ -31,7 +31,7 @@ function getLoopCount(config) {
 
 function incrementLoopCount(config) {
   let loopCount = getLoopCount(config)
-  localStorage.setItem(`${config.appUserPoolClientId}${loopKey}`, (loopCount + 1).toString());
+  sessionStorage.setItem(`${config.appUserPoolClientId}${loopKey}`, (loopCount + 1).toString());
   console.warn(`loopCount is now ${loopCount + 1}`);
 }
 
@@ -55,12 +55,12 @@ function getAuth(config) {
   auth.userhandler = {
     onSuccess(session) {
       console.debug('Sign in success');
-      localStorage.setItem(`${config.appUserPoolClientId}idtokenjwt`, session.getIdToken().getJwtToken());
-      localStorage.setItem(`${config.appUserPoolClientId}accesstokenjwt`, session.getAccessToken().getJwtToken());
-      localStorage.setItem(`${config.appUserPoolClientId}refreshtoken`, session.getRefreshToken().getToken());
+      sessionStorage.setItem(`${config.appUserPoolClientId}idtokenjwt`, session.getIdToken().getJwtToken());
+      sessionStorage.setItem(`${config.appUserPoolClientId}accesstokenjwt`, session.getAccessToken().getJwtToken());
+      sessionStorage.setItem(`${config.appUserPoolClientId}refreshtoken`, session.getRefreshToken().getToken());
       const myEvent = new CustomEvent('tokensavailable', { detail: 'initialLogin' });
       document.dispatchEvent(myEvent);
-      localStorage.setItem(`${config.appUserPoolClientId}${loopKey}`, "0");
+      sessionStorage.setItem(`${config.appUserPoolClientId}${loopKey}`, "0");
     },
     onFailure(err) {
       console.debug('Sign in failure: ' + JSON.stringify(err, null, 2));
@@ -86,10 +86,10 @@ function completeLogin(config) {
 }
 
 function completeLogout(config) {
-  localStorage.removeItem(`${config.appUserPoolClientId}idtokenjwt`);
-  localStorage.removeItem(`${config.appUserPoolClientId}accesstokenjwt`);
-  localStorage.removeItem(`${config.appUserPoolClientId}refreshtoken`);
-  localStorage.removeItem('cognitoid');
+  sessionStorage.removeItem(`${config.appUserPoolClientId}idtokenjwt`);
+  sessionStorage.removeItem(`${config.appUserPoolClientId}accesstokenjwt`);
+  sessionStorage.removeItem(`${config.appUserPoolClientId}refreshtoken`);
+  sessionStorage.removeItem('cognitoid');
   console.debug('logout complete');
   return true;
 }
@@ -98,7 +98,7 @@ function logout(config) {
 /* eslint-disable prefer-template, object-shorthand, prefer-arrow-callback */
   const auth = getAuth(config);
   auth.signOut();
-  localStorage.setItem(`${config.appUserPoolClientId}${loopKey}`, "0");
+  sessionStorage.setItem(`${config.appUserPoolClientId}${loopKey}`, "0");
 }
 
 const forceLogin = (config) => {
@@ -117,7 +117,7 @@ function login(config) {
     }, 500);
   } else {
     alert("max login tries exceeded");
-    localStorage.setItem(`${config.appUserPoolClientId}${loopKey}`, "0");
+    sessionStorage.setItem(`${config.appUserPoolClientId}${loopKey}`, "0");
   }
 }
 
@@ -128,9 +128,9 @@ function refreshLogin(config, token, callback) {
     auth.userhandler = {
       onSuccess(session) {
         console.debug('Sign in success');
-        localStorage.setItem(`${config.appUserPoolClientId}idtokenjwt`, session.getIdToken().getJwtToken());
-        localStorage.setItem(`${config.appUserPoolClientId}accesstokenjwt`, session.getAccessToken().getJwtToken());
-        localStorage.setItem(`${config.appUserPoolClientId}refreshtoken`, session.getRefreshToken().getToken());
+        sessionStorage.setItem(`${config.appUserPoolClientId}idtokenjwt`, session.getIdToken().getJwtToken());
+        sessionStorage.setItem(`${config.appUserPoolClientId}accesstokenjwt`, session.getAccessToken().getJwtToken());
+        sessionStorage.setItem(`${config.appUserPoolClientId}refreshtoken`, session.getRefreshToken().getToken());
         const myEvent = new CustomEvent('tokensavailable', {detail: 'refreshLogin'});
         document.dispatchEvent(myEvent);
         callback(session);
@@ -143,7 +143,7 @@ function refreshLogin(config, token, callback) {
     auth.refreshSession(token);
   } else {
     alert("max login tries exceeded");
-    localStorage.setItem(loopKey, "0");
+    sessionStorage.setItem(loopKey, "0");
   }
 }
 
