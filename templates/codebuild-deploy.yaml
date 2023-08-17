@@ -75,7 +75,7 @@ Parameters:
 
     EnableMarkdownSupport:
         Type: String
-        Default: true
+        Default: false
         AllowedValues:
         - true
         - false

@@ -777,12 +777,6 @@ export class IframeComponentLoader {
       postText: (message, messageType) => (
         this.sendMessageToIframe({event: 'postText', message: message, messageType: messageType})
       ),
-      deleteSession: () => (
-        this.sendMessageToIframe({ event: 'deleteSession' })
-      ),
-      startNewSession: () => (
-        this.sendMessageToIframe({ event: 'startNewSession' })
-      ),
       setSessionAttribute: (key, value) => (
           this.sendMessageToIframe({ event: 'setSessionAttribute', key: key, value: value })
       ),

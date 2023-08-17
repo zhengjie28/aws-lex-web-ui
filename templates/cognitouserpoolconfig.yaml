@@ -300,7 +300,10 @@ Resources:
                             UserPoolId='${CognitoUserPool}',
                             ClientId='${CognitoUserPoolClient}',
                             ClientName=normalized,
-                            RefreshTokenValidity=365,
+                            RefreshTokenValidity=60,
+                            TokenValidityUnits={
+                                'RefreshToken': 'minutes'
+                            },
                             CallbackURLs=callbackURLs,
                             LogoutURLs=logoutURLs,
                             SupportedIdentityProviders=supportedIDProviders,

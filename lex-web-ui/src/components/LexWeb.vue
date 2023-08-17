@@ -423,18 +423,6 @@ export default {
               event: 'resolve', type: evt.data.event,
             }));
           break;
-        case 'deleteSession':
-          this.$store.dispatch('deleteSession')
-            .then(() => evt.ports[0].postMessage({
-              event: 'resolve', type: evt.data.event,
-            }));
-          break;
-        case 'startNewSession':
-          this.$store.dispatch('startNewSession')
-            .then(() => evt.ports[0].postMessage({
-              event: 'resolve', type: evt.data.event,
-            }));
-          break;
         case 'setSessionAttribute':
           console.log(`From LexWeb: ${JSON.stringify(evt.data,null,2)}`);
           this.$store.dispatch(
