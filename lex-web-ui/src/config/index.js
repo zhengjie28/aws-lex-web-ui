@@ -445,7 +445,7 @@ const configFromFiles = mergeConfig(configDefault, configEnvFile);
 
 // TODO move query config to a store action
 // run time config from url query parameter
-//const queryParams = getUrlQueryParams(window.location.href);
+const queryParams = getUrlQueryParams(window.location.href);
 const configFromQuery = {};
 // security: delete origin from dynamic parameter
 if (configFromQuery.ui && configFromQuery.ui.parentOrigin) {

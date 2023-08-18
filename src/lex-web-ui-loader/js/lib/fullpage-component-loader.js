@@ -47,9 +47,9 @@ export class FullPageComponentLoader {
     const existingSession = existingAuth.getSignInUserSession();
     if (existingSession.isValid()) {
       const tokens = {};
-      tokens.idtokenjwt = localStorage.getItem(`${this.config.cognito.appUserPoolClientId}idtokenjwt`);
-      tokens.accesstokenjwt = localStorage.getItem(`${this.config.cognito.appUserPoolClientId}accesstokenjwt`);
-      tokens.refreshtoken = localStorage.getItem(`${this.config.cognito.appUserPoolClientId}refreshtoken`);
+      tokens.idtokenjwt = sessionStorage.getItem(`${this.config.cognito.appUserPoolClientId}idtokenjwt`);
+      tokens.accesstokenjwt = sessionStorage.getItem(`${this.config.cognito.appUserPoolClientId}accesstokenjwt`);
+      tokens.refreshtoken = sessionStorage.getItem(`${this.config.cognito.appUserPoolClientId}refreshtoken`);
       FullPageComponentLoader.sendMessageToComponent({
         event: 'confirmLogin',
         data: tokens,
@@ -63,11 +63,11 @@ export class FullPageComponentLoader {
    * services.
    */
   propagateTokensUpdateCredentials() {
-    const idtoken = localStorage.getItem(`${this.config.cognito.appUserPoolClientId}idtokenjwt`);
+    const idtoken = sessionStorage.getItem(`${this.config.cognito.appUserPoolClientId}idtokenjwt`);
     const tokens = {};
     tokens.idtokenjwt = idtoken;
-    tokens.accesstokenjwt = localStorage.getItem(`${this.config.cognito.appUserPoolClientId}accesstokenjwt`);
-    tokens.refreshtoken = localStorage.getItem(`${this.config.cognito.appUserPoolClientId}refreshtoken`);
+    tokens.accesstokenjwt = sessionStorage.getItem(`${this.config.cognito.appUserPoolClientId}accesstokenjwt`);
+    tokens.refreshtoken = sessionStorage.getItem(`${this.config.cognito.appUserPoolClientId}refreshtoken`);
     FullPageComponentLoader.sendMessageToComponent({
       event: 'confirmLogin',
       data: tokens,
@@ -114,7 +114,7 @@ export class FullPageComponentLoader {
   }
 
   async refreshAuthTokens() {
-    const refToken = localStorage.getItem(`${this.config.cognito.appUserPoolClientId}refreshtoken`);
+    const refToken = sessionStorage.getItem(`${this.config.cognito.appUserPoolClientId}refreshtoken`);
     if (refToken) {
       refreshLogin(this.generateConfigObj(), refToken, (refSession) => {
         if (refSession.isValid()) {
@@ -130,13 +130,13 @@ export class FullPageComponentLoader {
 
   validateIdToken() {
     return new Promise((resolve, reject) => {
-      let idToken = localStorage.getItem(`${this.config.cognito.appUserPoolClientId}idtokenjwt`);
+      let idToken = sessionStorage.getItem(`${this.config.cognito.appUserPoolClientId}idtokenjwt`);
       if (isTokenExpired(idToken)) {
-        const refToken = localStorage.getItem(`${this.config.cognito.appUserPoolClientId}refreshtoken`);
+        const refToken = sessionStorage.getItem(`${this.config.cognito.appUserPoolClientId}refreshtoken`);
         if (refToken && !isTokenExpired(refToken)) {
           refreshLogin(this.generateConfigObj(), refToken, (refSession) => {
             if (refSession.isValid()) {
-              idToken = localStorage.getItem(`${this.config.cognito.appUserPoolClientId}idtokenjwt`);
+              idToken = sessionStorage.getItem(`${this.config.cognito.appUserPoolClientId}idtokenjwt`);
               resolve(idToken);
             } else {
               reject(new Error('failed to refresh tokens'));
@@ -193,7 +193,7 @@ export class FullPageComponentLoader {
       }
 
       let credentials;
-      const token = localStorage.getItem(`${this.config.cognito.appUserPoolClientId}idtokenjwt`);
+      const token = sessionStorage.getItem(`${this.config.cognito.appUserPoolClientId}idtokenjwt`);
       if (token) { // auth role since logged in
         return this.validateIdToken().then((idToken) => {
           const logins = {};
